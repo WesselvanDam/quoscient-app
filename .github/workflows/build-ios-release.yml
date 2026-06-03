@@ -2,19 +2,6 @@ name: Build iOS Release
 
 on:
   workflow_dispatch:
-    inputs:
-      team_id:
-        description: "Apple Developer Team ID (10 characters, e.g., AB1C2D3E4F)"
-        required: true
-        type: string
-      app_store_connect_api_key_id:
-        description: "App Store Connect API Key ID"
-        required: true
-        type: string
-      app_store_connect_issuer_id:
-        description: "App Store Connect Issuer ID (UUID)"
-        required: true
-        type: string
 
 jobs:
   build-ios-release:
@@ -60,6 +47,11 @@ jobs:
       - name: Build Flutter iOS Release (no code sign)
         run: flutter build ios --release --no-codesign
 
+      - name: Configure App Store Connect API Key
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys/
+          echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
+
       - name: Build iOS Archive
         run: |
           cd ios
@@ -69,11 +61,13 @@ jobs:
             -derivedDataPath build/ios \
             -archivePath build/ios/Runner.xcarchive \
             -allowProvisioningUpdates \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
+            -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
+            -authenticationKeyIssuerID ${{ secrets.APPSTORE_API_ISSUER_ID }} \
             archive
         env:
-          DEVELOPMENT_TEAM: ${{ github.event.inputs.team_id }}
+          DEVELOPMENT_TEAM: ${{ secrets.APPSTORE_API_TEAM_ID }}
           CODE_SIGN_IDENTITY: "Apple Distribution"
-          PROVISIONING_PROFILE_SPECIFIER: ""
 
       - name: Export IPA
         run: |
@@ -82,32 +76,17 @@ jobs:
             -archivePath build/ios/Runner.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
             -exportPath build/ios/output \
-            -allowProvisioningUpdates
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
+            -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
+            -authenticationKeyIssuerID ${{ secrets.APPSTORE_API_ISSUER_ID }}
         env:
-          DEVELOPMENT_TEAM: ${{ github.event.inputs.team_id }}
+          DEVELOPMENT_TEAM: ${{ secrets.APPSTORE_API_TEAM_ID }}
 
-      - name: Upload IPA to artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-release-ipa
-          path: ios/build/ios/output/*.ipa
-          retention-days: 30
-          if-no-files-found: error
-
-      - name: Display build completion message
+      - name: Upload to TestFlight
         run: |
-          echo "✅ iOS .ipa built successfully!"
-          echo ""
-          echo "📦 Build artifacts available at:"
-          echo "   - IPA file: ios/build/ios/output/Runner.ipa"
-          echo ""
-          echo "📋 Next steps:"
-          echo "   1. Download the IPA artifact from GitHub Actions"
-          echo "   2. Go to App Store Connect: https://appstoreconnect.apple.com/"
-          echo "   3. Navigate to your app under 'My Apps'"
-          echo "   4. Click '+ Version' or '+ Build' to create a new build"
-          echo "   5. Upload the IPA using Xcode Organizer or App Store Connect web interface"
-          echo "   6. Fill in app metadata (description, screenshots, keywords, etc.)"
-          echo "   7. Submit for App Store Review"
-          echo ""
-          echo "⏱️  Expected review time: 24-48 hours"
+          xcrun altool --upload-app \
+            -f ios/build/ios/output/Runner.ipa \
+            -t ios \
+            --apiKey ${{ secrets.APPSTORE_API_KEY_ID }} \
+            --apiIssuer ${{ secrets.APPSTORE_API_ISSUER_ID }}
