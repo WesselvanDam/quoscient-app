@@ -55,17 +55,17 @@ jobs:
       - name: Build iOS Archive
         run: |
           cd ios
-          xcodebuild -workspace Runner.xcworkspace \
+          xcodebuild archive \
+            -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
+            -destination "generic/platform=iOS" \
             -derivedDataPath build/ios \
             -archivePath build/ios/Runner.xcarchive \
             -allowProvisioningUpdates \
             -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
             -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
-            -authenticationKeyIssuerID ${{ secrets.APPSTORE_API_ISSUER_ID }} \
-            DEVELOPMENT_TEAM="${{ secrets.APPSTORE_API_TEAM_ID }}" \
-            archive
+            -authenticationKeyIssuerID ${{ secrets.APPSTORE_API_ISSUER_ID }}
 
       - name: Export IPA
         run: |
@@ -78,7 +78,6 @@ jobs:
             -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
             -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
             -authenticationKeyIssuerID ${{ secrets.APPSTORE_API_ISSUER_ID }}
-            DEVELOPMENT_TEAM="${{ secrets.APPSTORE_API_TEAM_ID }}" \
 
       - name: Upload to TestFlight
         run: |
