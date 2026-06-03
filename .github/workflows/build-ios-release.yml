@@ -67,7 +67,7 @@ jobs:
             -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
             -authenticationKeyIssuerID ${{ secrets.APPSTORE_API_ISSUER_ID }}
 
-      - name: Export IPA
+      - name: Export and Upload to TestFlight
         run: |
           cd ios
           xcodebuild -exportArchive \
@@ -78,11 +78,3 @@ jobs:
             -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
             -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
             -authenticationKeyIssuerID ${{ secrets.APPSTORE_API_ISSUER_ID }}
-
-      - name: Upload to TestFlight
-        run: |
-          xcrun altool --upload-app \
-            -f ios/build/ios/output/Runner.ipa \
-            -t ios \
-            --apiKey ${{ secrets.APPSTORE_API_KEY_ID }} \
-            --apiIssuer ${{ secrets.APPSTORE_API_ISSUER_ID }}
