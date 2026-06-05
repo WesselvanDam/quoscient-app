@@ -1,16 +1,13 @@
-# code
+# Quoscient: Train Your Intuition
 
-A new Flutter project.
+The source code to the Quoscient App. Read more at [quoscient.app](https://quoscient.app)
 
-## Getting Started
+# Build for release
 
-This project is a starting point for a Flutter application.
+## Android
 
-A few resources to get you started if this is your first Flutter project:
+> `flutter build appbundle --flavor prod`
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## iOS
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Run the `Build iOS Release` workflow in Github Actions.
