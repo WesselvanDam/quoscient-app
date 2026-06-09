@@ -4,7 +4,7 @@ import 'package:flutter/material.dart' hide Card;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../client/talker.dart';
+import '../../../../../router/routes.dart';
 import '../../../../design_system/components/cards/card.dart';
 import '../../../../design_system/styles/app_colors.dart';
 import '../../../../design_system/styles/app_typography.dart';
@@ -46,7 +46,10 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
       spacing: 16,
       children: [
         const SizedBox(height: 24),
-        const Text('Welcome To Quoscient!', style: AppTypography.h2),
+        GestureDetector(
+          onDoubleTap: () => const HomeRoute().go(context),
+          child: const Text('Welcome To Quoscient!', style: AppTypography.h2),
+        ),
         const Text(
           'To continue, drag the squares until square B is twice the size of square A.',
           style: AppTypography.h4,
